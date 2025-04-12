@@ -3,13 +3,15 @@ from werkzeug.utils import secure_filename
 import os
 import tempfile
 from steg_detector import SteganographyDetector
+from flask_cors import CORS
 
 app = Flask(__name__)
 detector = SteganographyDetector()
 
+CORS(app)
+
 @app.route('/analyze', methods=['POST'])
 def analyze_image():
-    print("started")
     if 'image' not in request.files:
         return jsonify({"error": "No file part in the request"}), 400
 
@@ -23,7 +25,6 @@ def analyze_image():
         file.save(filepath)
 
         result = detector.analyze_image(filepath)
-        print(result)
         return jsonify(result)
 
 @app.route('/')

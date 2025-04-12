@@ -1,15 +1,9 @@
-#!/usr/bin/env python3
-"""
-Steganography Image Detector
-This module implements various algorithms to detect hidden data in images.
-"""
-
 import os
+
 import numpy as np
 from PIL import Image
 import cv2
 from stegano import lsb
-import io
 import binascii
 
 class SteganographyDetector:
@@ -48,13 +42,13 @@ class SteganographyDetector:
         
         if positive_detections >= 2:
             results["conclusion"] = "High probability of hidden data"
-            results["steganography_detected"] = True
+            results["steganography_detected"] = 2
         elif positive_detections == 1:
             results["conclusion"] = "Possible hidden data detected"
-            results["steganography_detected"] = True
+            results["steganography_detected"] = 1
         else:
             results["conclusion"] = "No hidden data detected"
-            results["steganography_detected"] = False
+            results["steganography_detected"] = 0
             
         return results
     
@@ -105,10 +99,14 @@ class SteganographyDetector:
             
             # Combine metrics for final score
             lsb_score = (avg_randomness + avg_bit_distribution) / 2
+
+            # compute the confidence score
+            confidence_score = max(1 - (lsb_score / self.lsb_threshold), 0)
+
             
             return {
-                "detected": bool(lsb_score < self.lsb_threshold),
-                "confidence": max(1 - (lsb_score / self.lsb_threshold), 0),
+                "detected": bool(confidence_score > 0.5),
+                "confidence": confidence_score,
                 "randomness_score": avg_randomness.item(),
                 "bit_distribution_score": avg_bit_distribution.item(),
                 "details": "LSB patterns show signs of non-random data" if lsb_score < self.lsb_threshold else "LSB patterns appear random"
@@ -166,10 +164,11 @@ class SteganographyDetector:
                 chi_square_results.append(chi_square)
             
             avg_chi_square = sum(chi_square_results) / len(chi_square_results)
+            confidence_score = 1 - (avg_chi_square / self.chi_square_threshold) if avg_chi_square < self.chi_square_threshold else 0
             
             return {
-                "detected": bool(avg_chi_square < self.chi_square_threshold),
-                "confidence": 1 - (avg_chi_square / self.chi_square_threshold) if avg_chi_square < self.chi_square_threshold else 0,
+                "detected": bool(confidence_score > 0.5),
+                "confidence":confidence_score,
                 "chi_square_value": avg_chi_square.item(),
                 "details": "Chi-square test indicates potential hidden data" if avg_chi_square < self.chi_square_threshold else "Chi-square test shows normal distribution"
             }
@@ -315,10 +314,12 @@ class SteganographyDetector:
                 if even_odd_ratio > 0.1:
                     suspicious_patterns += 1
                     details.append(f"{channel_name} channel has abnormal even/odd value distribution")
+
+            confidence_score = min(suspicious_patterns / 6, 1.0) if suspicious_patterns > 0 else 0;
             
             return {
-                "detected": suspicious_patterns >= 2,
-                "confidence": min(suspicious_patterns / 6, 1.0) if suspicious_patterns > 0 else 0,
+                "detected": bool(confidence_score > 0.5),
+                "confidence": confidence_score,
                 "suspicious_patterns": suspicious_patterns,
                 "details": "; ".join(details) if details else "No suspicious histogram patterns detected"
             }

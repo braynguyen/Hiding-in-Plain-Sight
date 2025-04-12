@@ -170,8 +170,10 @@ def main():
             progress_bar.empty()
             
             # Overall result
-            if results["steganography_detected"]:
+            if results["steganography_detected"] == 2:
                 st.markdown(f'<div class="steg-details"><h3 class="result-header positive-result">⚠️ {results["conclusion"]}</h3></div>', unsafe_allow_html=True)
+            elif results["steganography_detected"] == 1:
+                st.markdown(f'<div class="steg-details"><h3 class="result-header positive-result">🤔 {results["conclusion"]}</h3></div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<h3 class="result-header negative-result">✅ {results["conclusion"]}</h3>', unsafe_allow_html=True)
             
