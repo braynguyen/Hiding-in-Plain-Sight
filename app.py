@@ -7,6 +7,9 @@ import base64
 import mimetypes
 from steg_detector import SteganographyDetector
 from flask_cors import CORS
+from PIL import Image
+import numpy as np
+import base64
 
 app = Flask(__name__)
 detector = SteganographyDetector()
@@ -76,6 +79,44 @@ def analyze_zip():
                 results['files'].append({name: analysis_data})
 
         return jsonify(results)
+    
+@app.route('/lsbpic', method=['POST'])
+def lsbpic():
+    if 'image' not in request.files:
+        return jsonify({"error": "No file part in the request"}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+
+    filename = secure_filename(file.filename)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        filepath = os.path.join(tmpdir, filename)
+        file.save(filepath)
+
+        img = Image.open(filepath)
+        img = img.convert("RGB")
+        img_array = np.array(img)
+
+        # Extract the least significant bit (LSB) of each pixel
+        lsb_array = img_array & 1
+        lsb_image_array = (lsb_array * 255).astype(np.uint8)
+
+        try:
+            lsb_image = Image.fromarray(lsb_image_array)
+
+            # Save the LSB image to a temporary file
+            lsb_image_path = os.path.join(tmpdir, "lsb_image.png")
+            lsb_image.save(lsb_image_path)
+
+            # Encode the LSB image in base64
+            with open(lsb_image_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                # Return the base64-encoded LSB image as a response
+                return jsonify({"lsb_image_base64": encoded_string})
+        except Exception as e:
+            print(f"Error processing LSB image: {e}")
+            return jsonify({"error": "Failed to process LSB image"}), 500
 
 @app.route('/')
 def index():
