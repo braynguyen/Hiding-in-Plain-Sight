@@ -8,7 +8,7 @@ os.makedirs("test_images/steg", exist_ok=True)
 
 def hide_in_lsb1(image, message):
     # Convert message to binary string
-    binary_message = ''.join(format(ord(char), '08b') for char in message)
+    binary_message = ''.join(format(ord(char), '08b') for char in message) + '00000000'
 
     # Get pixel data
     pixels = np.array(image)
@@ -96,7 +96,7 @@ pattern_steg = Image.open('test_images/clean/pattern.png')
 steg_pattern = hide_in_lsb1(pattern_steg, message)
 steg_pattern.save('test_images/steg/steg_pattern.png')
 
-message = ":P"
+message = "hail to pitt :P"
 
 # Hide message in photo-like image
 photo_steg = Image.open('test_images/clean/photo_like.png')
