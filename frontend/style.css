@@ -591,3 +591,56 @@ body {
 .analysis-section[data-is-zip="true"] .image-display {
     margin-top: 0; /* Reduce top margin if zip nav is present */
 }
+
+/* Styles for Extracted Sample section */
+.extracted-sample-container {
+    position: relative; /* For positioning the copy button */
+    background-color: rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.extracted-sample-container pre {
+    margin: 0; /* Remove default margin */
+    padding: 0.8rem; 
+    white-space: pre-wrap;      /* Wrap long lines */
+    word-wrap: break-word;       /* Break words if necessary */
+    max-height: 200px; /* Limit height and add scroll if needed */
+    overflow-y: auto;
+    color: var(--primary-text);
+}
+
+.extracted-sample-container code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+}
+
+.copy-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: var(--secondary-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8em;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.copy-button:hover {
+    opacity: 1;
+    background-color: var(--accent-color);
+}
+
+.copy-button i {
+    margin-right: 4px;
+}
+
+.copy-button:disabled {
+    cursor: default;
+    opacity: 0.5;
+}

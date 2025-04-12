@@ -3,6 +3,8 @@ from werkzeug.utils import secure_filename
 import os
 import tempfile
 import zipfile
+import base64
+import mimetypes
 from steg_detector import SteganographyDetector
 from flask_cors import CORS
 
@@ -55,7 +57,23 @@ def analyze_zip():
                 file_path = os.path.join(root, name)
                 if file_path == zip_path:
                     continue
-                results['files'].append({name: detector.analyze_image(file_path)})
+                mime_type, _ = mimetypes.guess_type(file_path)
+                if not mime_type or not mime_type.startswith('image/'):
+                    continue
+                    
+                analysis_data = detector.analyze_image(file_path)
+                
+                try:
+                    with open(file_path, 'rb') as image_file:
+                        image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                    analysis_data['image_data'] = image_data
+                    analysis_data['mime_type'] = mime_type
+                except Exception as e:
+                    print(f"error reading or encoding image {name}: {e}")
+                    analysis_data['image_data'] = None
+                    analysis_data['mime_type'] = None
+
+                results['files'].append({name: analysis_data})
 
         return jsonify(results)
 
