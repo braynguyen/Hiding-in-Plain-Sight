@@ -103,7 +103,19 @@ header {
     color: var(--primary-text);
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 5px var(--primary-text);
+    /* Base subtle neon glow */
+    text-shadow:
+        0 0 4px var(--primary-text),
+        0 0 8px var(--accent-color);
+    transition: text-shadow 0.3s ease-in-out; /* Smooth transition for the glow */
+}
+
+.main-header:hover {
+    /* Enhanced subtle neon glow on hover */
+    text-shadow:
+        0 0 5px #fff, /* Inner white glow */
+        0 0 10px var(--primary-text),
+        0 0 15px var(--accent-color);
 }
 
 .sub-header {
@@ -620,15 +632,19 @@ body {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: var(--secondary-color);
+    background-color: var(--primary-text);
     color: var(--bg-color);
     border: none;
     padding: 3px 8px;
     border-radius: 3px;
     cursor: pointer;
-    font-size: 0.8em;
-    opacity: 0.7;
+    font-size: 0.7em;
+    opacity: 1;
     transition: opacity 0.2s ease, background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Roboto Mono', monospace;
 }
 
 .copy-button:hover {

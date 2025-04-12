@@ -714,8 +714,9 @@ document.addEventListener('DOMContentLoaded', () => {
                  <p><strong>Extracted Sample:</strong></p>
                  <!-- Use pre for better formatting of potentially multi-line text -->
                  <div class="extracted-sample-container">
-                     <pre><code class="extracted-data">${extraction.sample ? escapeHtml(extraction.sample) : 'No readable sample.'}</code></pre>
-                     ${extraction.sample ? '<button class="copy-button" title="Copy to clipboard"><i class="far fa-copy"></i> Copy</button>' : ''} 
+                     <pre><code class="extracted-data">${extraction.sample ? escapeHtml(extraction.sample) : 'No readable sample.'}</code>
+                     ${extraction.sample ? '<button class="copy-button" title="Copy to clipboard"><i class="far fa-copy"></i>Copy</button>' : ''}</pre>
+                      
                  </div>
              `;
 
@@ -731,18 +732,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (textToCopy && navigator.clipboard) {
                         navigator.clipboard.writeText(textToCopy).then(() => {
                             // Success feedback
-                            copyButton.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                            copyButton.innerHTML = '<i class="fas fa-check"></i>Copied!';
                             copyButton.disabled = true;
                             setTimeout(() => {
-                                copyButton.innerHTML = '<i class="far fa-copy"></i> Copy';
+                                copyButton.innerHTML = '<i class="far fa-copy"></i>Copy';
                                 copyButton.disabled = false;
                             }, 2000); // Reset after 2 seconds
                         }).catch(err => {
                             console.error('Failed to copy text: ', err);
                             // Optionally show error feedback to user
-                             copyButton.innerHTML = '<i class="fas fa-times"></i> Failed';
+                             copyButton.innerHTML = '<i class="fas fa-times"></i>Failed';
                               setTimeout(() => {
-                                copyButton.innerHTML = '<i class="far fa-copy"></i> Copy';
+                                copyButton.innerHTML = '<i class="far fa-copy"></i>Copy';
                             }, 2000);
                         });
                     } else if (!navigator.clipboard) {
