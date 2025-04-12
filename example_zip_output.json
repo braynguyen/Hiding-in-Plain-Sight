@@ -1,0 +1,144 @@
+{
+  "files": [
+    {
+      "steg_blank.png": {
+        "conclusion": "Possible hidden data detected",
+        "detection_methods": {
+          "chi_square": {
+            "chi_square_value": 350.698486328125,
+            "confidence": 0,
+            "details": "Chi-square test shows normal distribution",
+            "detected": false
+          },
+          "histogram_analysis": {
+            "confidence": 0.5,
+            "details": "Blue channel has abnormal even/odd value distribution; Green channel has abnormal even/odd value distribution; Red channel has abnormal even/odd value distribution",
+            "detected": false,
+            "suspicious_patterns": 3
+          },
+          "lsb_analysis": {
+            "bit_distribution_score": 0.4991555555555556,
+            "confidence": 0,
+            "details": "LSB patterns appear random",
+            "detected": false,
+            "randomness_score": 0.16890932738758827
+          },
+          "sample_extraction": {
+            "data_type": "text",
+            "details": "Manually extracted potential hidden text",
+            "detected": true,
+            "sample": "The quick brown fox jumps over the lazy dog. 1234567890!@#$%^&*()\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+          }
+        },
+        "file_size": 1098,
+        "filename": "steg_blank.png",
+        "steganography_detected": 1
+      }
+    },
+    {
+      "steg_gradient.png": {
+        "conclusion": "High probability of hidden data",
+        "detection_methods": {
+          "chi_square": {
+            "chi_square_value": 16.920061111450195,
+            "confidence": 0,
+            "details": "Chi-square test shows normal distribution",
+            "detected": false
+          },
+          "histogram_analysis": {
+            "confidence": 1.0,
+            "details": "Blue channel shows comb pattern in histogram; Blue channel has unusual peaks in histogram; Blue channel has abnormal even/odd value distribution; Green channel shows comb pattern in histogram; Green channel has unusual peaks in histogram; Green channel has abnormal even/odd value distribution; Red channel shows comb pattern in histogram; Red channel has unusual peaks in histogram; Red channel has abnormal even/odd value distribution",
+            "detected": true,
+            "suspicious_patterns": 9
+          },
+          "lsb_analysis": {
+            "bit_distribution_score": 0.4998185185185185,
+            "confidence": 0.10766652215202932,
+            "details": "LSB patterns show signs of non-random data",
+            "detected": false,
+            "randomness_score": 0.03558156819026384
+          },
+          "sample_extraction": {
+            "data_type": "binary",
+            "details": "Manually extracted potential hidden binary data",
+            "detected": true,
+            "sample": "49206c6f7665205069747420435343000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        "file_size": 1297,
+        "filename": "steg_gradient.png",
+        "steganography_detected": 2
+      }
+    },
+    {
+      "steg_pattern.png": {
+        "conclusion": "Possible hidden data detected",
+        "detection_methods": {
+          "chi_square": {
+            "chi_square_value": 351.3126220703125,
+            "confidence": 0,
+            "details": "Chi-square test shows normal distribution",
+            "detected": false
+          },
+          "histogram_analysis": {
+            "confidence": 0.5,
+            "details": "Blue channel has abnormal even/odd value distribution; Green channel has abnormal even/odd value distribution; Red channel has abnormal even/odd value distribution",
+            "detected": false,
+            "suspicious_patterns": 3
+          },
+          "lsb_analysis": {
+            "bit_distribution_score": 0.49957777777777784,
+            "confidence": 0.031370741979437566,
+            "details": "LSB patterns show signs of non-random data",
+            "detected": false,
+            "randomness_score": 0.08159977703455963
+          },
+          "sample_extraction": {
+            "data_type": "text",
+            "details": "Manually extracted potential hidden text",
+            "detected": true,
+            "sample": "What you know about Nij Patel?\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"
+          }
+        },
+        "file_size": 1123,
+        "filename": "steg_pattern.png",
+        "steganography_detected": 1
+      }
+    },
+    {
+      "steg_photo.png": {
+        "conclusion": "High probability of hidden data",
+        "detection_methods": {
+          "chi_square": {
+            "chi_square_value": 17.769899368286133,
+            "confidence": 0,
+            "details": "Chi-square test shows normal distribution",
+            "detected": false
+          },
+          "histogram_analysis": {
+            "confidence": 1.0,
+            "details": "Blue channel shows comb pattern in histogram; Blue channel has unusual peaks in histogram; Blue channel has abnormal even/odd value distribution; Green channel shows comb pattern in histogram; Green channel has unusual peaks in histogram; Green channel has abnormal even/odd value distribution; Red channel shows comb pattern in histogram; Red channel has unusual peaks in histogram; Red channel has abnormal even/odd value distribution",
+            "detected": true,
+            "suspicious_patterns": 9
+          },
+          "lsb_analysis": {
+            "bit_distribution_score": 0.4999777777777778,
+            "confidence": 0.1587977207977207,
+            "details": "LSB patterns show signs of non-random data",
+            "detected": false,
+            "randomness_score": 0.004743589743589744
+          },
+          "sample_extraction": {
+            "data_type": "binary",
+            "details": "Manually extracted potential hidden binary data",
+            "detected": true,
+            "sample": "3a5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        "file_size": 3885,
+        "filename": "steg_photo.png",
+        "steganography_detected": 2
+      }
+    }
+  ]
+}
