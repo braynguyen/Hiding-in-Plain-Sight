@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const overallResultDiv = document.getElementById('overall-result');
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
+    const scanLine = document.querySelector('.image-preview-container .scan-line');
 
     const API_ENDPOINT = 'http://127.0.0.1:5000/analyze'; // Your API endpoint
 
@@ -127,9 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
         tabContents.forEach(content => content.classList.remove('active'));
         document.querySelector('.tab-button[data-tab="lsb"]').classList.add('active');
         document.getElementById('tab-lsb').classList.add('active');
+        if (scanLine) scanLine.style.display = 'none'; // Hide scan line on reset
     }
 
     async function startAnalysis(file) {
+        if (scanLine) scanLine.style.display = 'block'; // Show scan line
         progressBar.style.width = '10%'; // Initial progress
         statusText.textContent = '//: Preparing image for analysis...';
 
@@ -171,10 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // though we already display some from the file object.
             // Example: results.filename = results.filename || file.name; (If API provides it)
 
+            if (scanLine) scanLine.style.display = 'none'; // Hide scan line before displaying results
             displayResults(results); // Display the actual results
 
         } catch (error) {
             console.error('Analysis Error:', error);
+            if (scanLine) scanLine.style.display = 'none'; // Hide scan line on error
             progressBar.style.width = '100%';
             progressBar.style.backgroundColor = 'var(--error-color)'; // Indicate error
             statusText.textContent = `//: Analysis Failed! ${error.message}`;
