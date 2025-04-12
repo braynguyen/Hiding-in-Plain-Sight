@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography Detector</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="container">
+        <main class="main-content">
+            <header>
+                <h1 class="main-header">[ Hidden_in_Plain_Sight ]</h1>
+                <h2 class="sub-header">//: Steganography Image Detector</h2>
+            </header>
+
+            <section class="upload-section">
+                <label for="file-upload" class="file-upload-label">
+                    <i class="fas fa-upload"></i> Select Image Target...
+                </label>
+                <input type="file" id="file-upload" accept="image/png, image/jpeg, image/bmp, image/gif, image/tiff">
+                <p id="file-name" class="file-name-display">No file selected.</p>
+            </section>
+
+            <section class="analysis-section" id="analysis-section" style="display: none;">
+                <div class="image-display">
+                    <div class="image-preview-container">
+                        <h3>>> Uploaded Image</h3>
+                        <img id="image-preview" src="#" alt="Uploaded Image Preview">
+                    </div>
+                    <div class="image-info">
+                        <h3>>> Image Metadata</h3>
+                        <ul id="image-details"></ul>
+                    </div>
+                </div>
+
+                <div class="analysis-progress">
+                    <h3>>> Analyzing Image_</h3>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <p id="status-text" class="status-text">//: Standby...</p>
+                </div>
+
+                <div class="results-section" id="results-section" style="display: none;">
+                    <div id="overall-result" class="overall-result"></div>
+
+                    <div class="detailed-results">
+                        <h3>//: Detailed Analysis Log</h3>
+                        <nav class="tabs">
+                            <button class="tab-button active" data-tab="lsb">LSB Analysis</button>
+                            <button class="tab-button" data-tab="chi">Chi-Square</button>
+                            <button class="tab-button" data-tab="extract">Sample Extract</button>
+                            <button class="tab-button" data-tab="hist">Histogram</button>
+                        </nav>
+
+                        <div class="tab-content active" id="tab-lsb"></div>
+                        <div class="tab-content" id="tab-chi"></div>
+                        <div class="tab-content" id="tab-extract"></div>
+                        <div class="tab-content" id="tab-hist"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>//: System interface for digital forensics research. Use responsibly.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
