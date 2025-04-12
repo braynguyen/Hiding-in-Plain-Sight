@@ -232,7 +232,7 @@ class SteganographyDetector:
                     byte_array.append(byte)
                 
                 # Check if the extracted data looks like text
-                is_text = all(32 <= b <= 126 for b in byte_array[:20])
+                is_text = all(32 <= b <= 126 for b in byte_array[:10])
                 
                 if is_text:
                     sample_text = byte_array.decode('ascii', errors='replace')
