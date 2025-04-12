@@ -16,6 +16,32 @@ detector = SteganographyDetector()
 
 CORS(app)
 
+def create_lsb_pic(tmpdir, filepath):
+    img = Image.open(filepath)
+    img = img.convert("RGB")
+    img_array = np.array(img)
+
+    # Extract the least significant bit (LSB) of each pixel
+    lsb_array = img_array & 1
+    lsb_image_array = (lsb_array * 255).astype(np.uint8)
+
+    try:
+        lsb_image = Image.fromarray(lsb_image_array)
+
+        # Save the LSB image to a temporary file
+        base_name = os.path.splitext(os.path.basename(filepath))[0]
+        lsb_image_path = os.path.join(tmpdir, f"{base_name}_lsb.png")
+        lsb_image.save(lsb_image_path)
+
+        # Encode the LSB image in base64
+        with open(lsb_image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            # Return the base64-encoded LSB image as a string
+            return encoded_string
+    except Exception as e:
+        print(f"Error processing LSB image: {e}")
+        return None
+
 @app.route('/analyze', methods=['POST'])
 def analyze_image():
     if 'image' not in request.files:
@@ -31,6 +57,8 @@ def analyze_image():
         file.save(filepath)
 
         result = detector.analyze_image(filepath)
+        lsb_pic = create_lsb_pic(tmpdir, filepath)
+        result['lsbpic'] = lsb_pic
         return jsonify(result)
 
 @app.route('/analyzezip', methods=['POST'])
@@ -69,12 +97,20 @@ def analyze_zip():
                 try:
                     with open(file_path, 'rb') as image_file:
                         image_data = base64.b64encode(image_file.read()).decode('utf-8')
-                    analysis_data['image_data'] = image_data
-                    analysis_data['mime_type'] = mime_type
+                        analysis_data['image_data'] = image_data
+                        analysis_data['mime_type'] = mime_type
                 except Exception as e:
                     print(f"error reading or encoding image {name}: {e}")
                     analysis_data['image_data'] = None
                     analysis_data['mime_type'] = None
+
+                # Add LSB pic to the analysis data
+                try:
+                    lsb_pic = create_lsb_pic(tmpdir, file_path)
+                    analysis_data['lsbpic'] = lsb_pic
+                except Exception as e:
+                    print(f"error creating LSB pic for image {name}: {e}")
+                    analysis_data['lsbpic'] = None
 
                 results['files'].append({name: analysis_data})
 
@@ -94,29 +130,6 @@ def lsbpic():
         filepath = os.path.join(tmpdir, filename)
         file.save(filepath)
 
-        img = Image.open(filepath)
-        img = img.convert("RGB")
-        img_array = np.array(img)
-
-        # Extract the least significant bit (LSB) of each pixel
-        lsb_array = img_array & 1
-        lsb_image_array = (lsb_array * 255).astype(np.uint8)
-
-        try:
-            lsb_image = Image.fromarray(lsb_image_array)
-
-            # Save the LSB image to a temporary file
-            lsb_image_path = os.path.join(tmpdir, "lsb_image.png")
-            lsb_image.save(lsb_image_path)
-
-            # Encode the LSB image in base64
-            with open(lsb_image_path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-                # Return the base64-encoded LSB image as a response
-                return jsonify({"lsb_image_base64": encoded_string})
-        except Exception as e:
-            print(f"Error processing LSB image: {e}")
-            return jsonify({"error": "Failed to process LSB image"}), 500
 
 @app.route('/')
 def index():
