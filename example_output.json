@@ -1,0 +1,33 @@
+{
+    "conclusion": "Possible hidden data detected",
+    "detection_methods": {
+        "chi_square": {
+            "chi_square_value": 16.465665817260742,
+            "confidence": 0,
+            "details": "Chi-square test shows normal distribution",
+            "detected": false
+        },
+        "histogram_analysis": {
+            "confidence": 0,
+            "details": "No suspicious histogram patterns detected",
+            "detected": false,
+            "suspicious_patterns": 0
+        },
+        "lsb_analysis": {
+            "bit_distribution_score": 0.00010370370370371695,
+            "confidence": 0,
+            "details": "LSB patterns appear random",
+            "detected": false,
+            "randomness_score": 85.18268859160163
+        },
+        "sample_extraction": {
+            "data_type": "text",
+            "details": "Successfully extracted hidden data",
+            "detected": true,
+            "sample": "I love Pitt CSC"
+        }
+    },
+    "file_size": 1039,
+    "filename": "steg_gradient.png",
+    "steganography_detected": true
+}
