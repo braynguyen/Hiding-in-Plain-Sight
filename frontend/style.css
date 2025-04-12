@@ -562,3 +562,32 @@ body {
     border-radius: 5px;
     margin-bottom: 1rem;
 }
+
+/* Zip Result Navigation Styles */
+.zip-results-nav {
+    text-align: center;
+    padding: 0.5rem;
+    background-color: rgba(0, 20, 0, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.zip-results-nav label {
+    margin-right: 10px;
+    color: var(--primary-text);
+}
+
+.zip-result-selector {
+    padding: 5px 8px;
+    background-color: var(--bg-color);
+    color: var(--primary-text);
+    border: 1px solid var(--accent-color);
+    border-radius: 3px;
+    font-family: var(--font-mono);
+}
+
+/* Adjustments for image preview when zip nav is shown */
+/* This might need tweaking depending on layout */
+.analysis-section[data-is-zip="true"] .image-display {
+    margin-top: 0; /* Reduce top margin if zip nav is present */
+}

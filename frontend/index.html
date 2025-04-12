@@ -24,18 +24,26 @@
 
             <section class="upload-section">
                 <label for="file-upload" class="file-upload-label">
-                    <i class="fas fa-upload"></i> Select Image Target...
+                    <i class="fas fa-upload"></i> Select Image Target or ZIP...
                 </label>
-                <input type="file" id="file-upload" accept="image/png, image/jpeg, image/bmp, image/gif, image/tiff">
+                <input type="file" id="file-upload" accept="image/png, image/jpeg, image/bmp, image/gif, image/tiff, application/zip, .zip">
                 <p id="file-name" class="file-name-display">No file selected.</p>
             </section>
 
             <section class="analysis-section" id="analysis-section" style="display: none;">
-                <div class="image-display">
+                <!-- Container for Zip Result Navigation (initially hidden) -->
+                <div id="zip-results-nav" class="zip-results-nav" style="display: none; margin-bottom: 1rem;">
+                    <label for="zip-result-selector">Select Image from ZIP:</label>
+                    <select id="zip-result-selector" class="zip-result-selector"></select>
+                </div>
+
+                <div class="image-display" id="image-display-area">
                     <div class="image-preview-container">
                         <h3>>> Uploaded Image</h3>
-                        <img id="image-preview" src="#" alt="Uploaded Image Preview">
-                        <div class="scan-line"></div>
+                        <div class="scanline-container relative inline-block mb-3 border border-green-700 rounded-sm">
+                            <img id="image-preview" src="#" alt="Uploaded Image Preview">
+                            <div class="scan-line"></div>
+                        </div>
                     </div>
                     <div class="image-info">
                         <h3>>> Image Metadata</h3>
