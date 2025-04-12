@@ -116,20 +116,6 @@ def analyze_zip():
 
         return jsonify(results)
     
-@app.route('/lsbpic', method=['POST'])
-def lsbpic():
-    if 'image' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
-
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({"error": "No file selected"}), 400
-
-    filename = secure_filename(file.filename)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        filepath = os.path.join(tmpdir, filename)
-        file.save(filepath)
-
 
 @app.route('/')
 def index():
