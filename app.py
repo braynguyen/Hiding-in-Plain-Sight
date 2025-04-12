@@ -116,7 +116,7 @@ def analyze_zip():
 
         return jsonify(results)
     
-@app.route('/lsbpic', method=['POST'])
+@app.route('/lsbpic', methods=['POST'])
 def lsbpic():
     if 'image' not in request.files:
         return jsonify({"error": "No file part in the request"}), 400

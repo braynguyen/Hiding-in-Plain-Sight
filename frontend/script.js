@@ -167,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
     const scanlineContainer = document.querySelector('.scanline-container');
+    const lsbPicContainer = document.getElementById('lsb-pic-container'); // New reference
+    const lsbPicImg = document.getElementById('lsb-pic'); // New reference
 
     // Zip results elements
     const zipResultsNav = document.getElementById('zip-results-nav');
@@ -323,6 +325,10 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3>';
         if (imageInfoDiv) imageInfoDiv.style.display = 'block';
         imageDetailsList.innerHTML = '';
+
+        // Reset LSB Pic elements
+        if (lsbPicContainer) lsbPicContainer.style.display = 'none';
+        if (lsbPicImg) lsbPicImg.src = '#';
 
         // Reset zip state
         zipResultsNav.style.display = 'none';
@@ -608,7 +614,22 @@ document.addEventListener('DOMContentLoaded', () => {
         overallResultDiv.className = 'overall-result';
         overallResultDiv.classList.add(resultData.steganography_detected ? 'positive' : 'negative');
 
-        tabContents.forEach(content => content.innerHTML = ''); // Clear tabs
+        // Update LSB Visualization display
+        if (lsbPicContainer && lsbPicImg) {
+            // ** Assumption: Backend returns LSB image as base64 in this field **
+            const lsbBase64 = resultData?.detection_methods?.lsb_analysis?.visualization_base64;
+            
+            if (lsbBase64) {
+                lsbPicImg.src = `data:image/png;base64,${lsbBase64}`;
+                lsbPicContainer.style.display = 'flex'; // Use flex to match styling
+            } else {
+                lsbPicImg.src = '#'; // Clear source if no image data
+                lsbPicContainer.style.display = 'none'; // Hide container
+            }
+        }
+
+        // Clear existing tab content before populating
+        tabContents.forEach(content => content.innerHTML = '');
 
         if (resultData.detection_methods) {
             populateLSBTab(resultData.detection_methods.lsb_analysis || {});

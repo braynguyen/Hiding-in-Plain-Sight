@@ -38,12 +38,17 @@
 
                 <div class="image-display" id="image-display-area">
                     <div class="image-preview-container">
-                        <h3>>> Uploaded Image</h3>
-                        <div class="scanline-container relative inline-block mb-3 border border-green-700 rounded-sm">
-                            <img id="image-preview" src="#" alt="Uploaded Image Preview">
-                            <div class="scan-line"></div>
+                        <h3>>> Uploaded File</h3>
+                        <div class="scanline-container" style="display: none;">
+                             <img id="image-preview" src="#" alt="Uploaded Image Preview">
                         </div>
                     </div>
+
+                    <div id="lsb-pic-container" class="lsb-pic-container" style="display: none;">
+                        <h3>>> LSB Visualization</h3>
+                        <img id="lsb-pic" src="#" alt="LSB Visualization">
+                    </div>
+
                     <div class="image-info">
                         <h3>>> Image Metadata</h3>
                         <ul id="image-details"></ul>

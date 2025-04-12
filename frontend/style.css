@@ -660,3 +660,40 @@ body {
     cursor: default;
     opacity: 0.5;
 }
+
+/* LSB Pic Container Styles */
+.lsb-pic-container {
+    /* Mirror styles from image-preview-container */
+    position: relative;
+    border: 1px solid var(--accent-color);
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    flex: 1; /* Occupy space */
+    min-width: 300px; /* Minimum width */
+    height: auto;
+    max-height: 400px; /* Same max height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Initially hidden, shown by JS */
+    display: none; 
+}
+
+.lsb-pic-container h3 {
+    /* Mirror styles from image-preview-container h3 */
+    margin-bottom: 10px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1em;
+    color: var(--primary-text);
+    text-shadow: 0 0 5px var(--primary-text);
+}
+
+#lsb-pic {
+    /* Mirror styles from #image-preview */
+    max-width: 100%;
+    max-height: calc(400px - 40px - 1.1em); /* Same calculation */
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid var(--secondary-color);
+}
