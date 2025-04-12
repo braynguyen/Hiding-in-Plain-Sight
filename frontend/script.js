@@ -280,14 +280,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function displayFileInfo(file, imgElement = null) {
+    function displayFileInfo(fileOrData, imgElement = null) {
+        const isFileDataObject = typeof fileOrData === 'object' && fileOrData !== null && fileOrData.filename;
+        const filename = isFileDataObject ? fileOrData.filename : fileOrData.name;
+        const filesize = isFileDataObject ? fileOrData.file_size : fileOrData.size;
+        const mimetype = isFileDataObject ? fileOrData.mime_type : fileOrData.type;
+
         imageDetailsList.innerHTML = 
-           `<li><strong>Filename:</strong> ${escapeHtml(file.name)}</li>
-           <li><strong>File size:</strong> ${(file.size / 1024).toFixed(2)} KB</li>
-           <li><strong>MIME Type:</strong> ${escapeHtml(file.type) || 'N/A'}</li>
-           `; // Use correct template literal and escape potentially unsafe names/types
+           `<li><strong>Filename:</strong> ${escapeHtml(filename)}</li>
+           <li><strong>File size:</strong> ${(filesize / 1024).toFixed(2)} KB</li>
+           <li><strong>MIME Type:</strong> ${escapeHtml(mimetype) || 'N/A'}</li>
+           `;
         if (imgElement && imgElement.naturalWidth) {
-             imageDetailsList.innerHTML += `<li><strong>Dimensions:</strong> ${imgElement.naturalWidth} x ${imgElement.naturalHeight} pixels</li>`; // Correct template literal
+             imageDetailsList.innerHTML += `<li><strong>Dimensions:</strong> ${imgElement.naturalWidth} x ${imgElement.naturalHeight} pixels</li>`;
         }
     }
 
@@ -376,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const results = await response.json();
-
+            console.log(results);
             progressBar.style.width = '100%';
             statusText.textContent = '//: Analysis Complete. Rendering results...';
 
@@ -411,18 +416,30 @@ document.addEventListener('DOMContentLoaded', () => {
         delete zipResultSelector.dataset.hasScrolled;
 
         if (isZip) {
-            // Assuming results format: { "filename1": { analysis_data... }, "filename2": ... }
-            currentZipResults = results;
-            const filenames = Object.keys(results).sort();
-
-            if (filenames.length === 0) {
-                statusText.textContent = "//: ZIP analysis complete, but no supported images found.";
+            // Check if the expected 'files' array exists
+            if (!results || !Array.isArray(results.files) || results.files.length === 0) {
+                console.warn("ZIP Analysis: Response format incorrect or no files found.", results);
+                statusText.textContent = "//: ZIP analysis complete, but no supported image data found.";
                 overallResultDiv.innerHTML = '<i class="fas fa-info-circle"></i> No images found or processed in ZIP.';
                 overallResultDiv.className = 'overall-result'; // Neutral style
                 resultsSection.style.display = 'block';
                 return;
             }
 
+            // Store the array of file result objects
+            currentZipResults = results.files; 
+
+            // Populate the dropdown and prepare for display
+            const filenames = currentZipResults.map(fileObj => Object.keys(fileObj)[0]).sort();
+
+            if (filenames.length === 0) {
+                 statusText.textContent = "//: ZIP analysis complete, but no supported images found.";
+                 overallResultDiv.innerHTML = '<i class="fas fa-info-circle"></i> No images found or processed in ZIP.';
+                 overallResultDiv.className = 'overall-result'; // Neutral style
+                 resultsSection.style.display = 'block';
+                 return;
+            }
+            
             filenames.forEach(fname => {
                 const option = document.createElement('option');
                 option.value = fname;
@@ -435,7 +452,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
             zipResultsNav.style.display = 'block';
             currentSelectedFileInZip = filenames[0];
-            displaySingleResult(results[currentSelectedFileInZip], currentSelectedFileInZip, true); // Initial load
+
+            // Find the data for the first file to display initially
+            const firstFileObject = currentZipResults.find(fileObj => Object.keys(fileObj)[0] === currentSelectedFileInZip);
+            if (firstFileObject) {
+                const firstFileData = firstFileObject[currentSelectedFileInZip];
+
+                // --- added: display the first image preview --- 
+                if (firstFileData.image_data && firstFileData.mime_type) {
+                    imagePreview.src = `data:${firstFileData.mime_type};base64,${firstFileData.image_data}`;
+                    imagePreview.style.display = 'block';
+                    if (scanlineContainer) {
+                        scanlineContainer.innerHTML = ''; // Clear first
+                        scanlineContainer.appendChild(imagePreview);
+                        // Ensure scan line div exists and is hidden initially
+                        let scanLineDiv = scanlineContainer.querySelector('.scan-line');
+                        if (!scanLineDiv) {
+                            scanLineDiv = document.createElement('div');
+                            scanLineDiv.className = 'scan-line';
+                            scanlineContainer.appendChild(scanLineDiv);
+                        }
+                        scanLineDiv.style.display = 'none';
+                        scanlineContainer.style.display = 'inline-block';
+                        // Add scanline container back to main preview container
+                        if (!imagePreviewContainer.contains(scanlineContainer)) {
+                            imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3>';
+                            imagePreviewContainer.appendChild(scanlineContainer);
+                        }
+                    } else {
+                        // Fallback
+                        imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3>';
+                        imagePreviewContainer.appendChild(imagePreview);
+                    }
+                    // Set up onload/onerror for the initial image
+                    imagePreview.onload = () => {
+                        displayFileInfo(firstFileData, imagePreview); 
+                        imagePreview.onload = null; 
+                    };
+                    imagePreview.onerror = () => {
+                         console.error("error loading base64 image data for initial file:", currentSelectedFileInZip);
+                         imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3><p style="color:var(--error-color);">Preview unavailable</p>';
+                         displayFileInfo(firstFileData); 
+                         imagePreview.onerror = null;
+                    }
+                    // Manually trigger if already complete
+                    if (imagePreview.complete) {
+                       displayFileInfo(firstFileData, imagePreview);
+                    }
+                } else {
+                    // If the first file has no image data, show placeholder
+                    imagePreviewContainer.innerHTML = 
+                    `<h3>>> Uploaded File</h3>
+                     <div class="zip-placeholder" style="font-size: 5em; text-align: center; margin: auto; color: var(--primary-text);">
+                         <i class="fas fa-file"></i> <p style="font-size: 0.3em;">No preview</p>
+                     </div>`;
+                    imagePreview.style.display = 'none';
+                    if (scanlineContainer) scanlineContainer.style.display = 'none';
+                    displayFileInfo(firstFileData); // Display basic info even without preview
+                }
+                // --- end added section ---
+
+                displaySingleResult(firstFileData, currentSelectedFileInZip, true); // Initial load for results tabs
+            } else {
+                console.error("Could not find data for initial file:", currentSelectedFileInZip);
+                 // Handle error: display a general message or the first available result
+            }
 
         } else {
             // Single image result
@@ -445,9 +526,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleZipSelectionChange(event) {
         const selectedFilename = event.target.value;
-        if (currentZipResults && currentZipResults[selectedFilename]) {
+        // Find the object in the array that contains the selected filename as a key
+        const fileObject = currentZipResults.find(fileObj => Object.keys(fileObj)[0] === selectedFilename);
+
+        if (fileObject) {
             currentSelectedFileInZip = selectedFilename;
-            displaySingleResult(currentZipResults[selectedFilename], selectedFilename, false); // Not initial load
+            const fileData = fileObject[selectedFilename];
+
+            // update image preview if data exists
+            if (fileData.image_data && fileData.mime_type) {
+                imagePreview.src = `data:${fileData.mime_type};base64,${fileData.image_data}`; // correct template literal
+                imagePreview.style.display = 'block';
+                // ensure the container is set up correctly if it was previously showing the zip icon
+                if(scanlineContainer) {
+                    scanlineContainer.innerHTML = ''; // clear first
+                    scanlineContainer.appendChild(imagePreview);
+                    // add scan line div if it doesn't exist
+                    let scanLineDiv = scanlineContainer.querySelector('.scan-line');
+                    if (!scanLineDiv) {
+                        scanLineDiv = document.createElement('div');
+                        scanLineDiv.className = 'scan-line';
+                        scanLineDiv.style.display = 'none'; // start hidden
+                        scanlineContainer.appendChild(scanLineDiv);
+                    }
+                    scanlineContainer.style.display = 'inline-block'; // show container
+                    // make sure scanline container is in the main preview container
+                    if (!imagePreviewContainer.contains(scanlineContainer)) {
+                        imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3>'; // clear container
+                        imagePreviewContainer.appendChild(scanlineContainer);
+                    }
+                } else {
+                    // fallback: clear preview container and add image
+                    imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3>';
+                    imagePreviewContainer.appendChild(imagePreview);
+                }
+                
+                // Trigger onload manually if needed for size calculations after setting src
+                imagePreview.onload = () => {
+                    displayFileInfo(fileData, imagePreview); // Update info with dimensions
+                    imagePreview.onload = null; // Clean up listener
+                };
+                // Handle potential errors loading the base64 data
+                imagePreview.onerror = () => {
+                     console.error("error loading base64 image data for:", selectedFilename);
+                     imagePreviewContainer.innerHTML = '<h3>>> Uploaded File</h3><p style="color:var(--error-color);">Preview unavailable</p>';
+                     displayFileInfo(fileData); // Display basic info
+                     imagePreview.onerror = null;
+                }
+                // If the image is already cached, onload might not fire, manually call displayFileInfo
+                if (imagePreview.complete) {
+                   displayFileInfo(fileData, imagePreview);
+                }
+
+            } else {
+                // if no image data, show placeholder (e.g., non-image file in zip)
+                imagePreviewContainer.innerHTML = 
+                `<h3>>> Uploaded File</h3>
+                 <div class="zip-placeholder" style="font-size: 5em; text-align: center; margin: auto; color: var(--primary-text);">
+                     <i class="fas fa-file"></i> <p style="font-size: 0.3em;">No preview</p>
+                 </div>`;
+                imagePreview.style.display = 'none';
+                if (scanlineContainer) scanlineContainer.style.display = 'none';
+                displayFileInfo(fileData); // show basic file info
+            }
+
+            // display analysis results for the selected file
+            displaySingleResult(fileData, selectedFilename, false); // not initial load
+        } else {
+            console.error("Could not find results for selected file:", selectedFilename);
+             // optionally display an error message to the user
         }
     }
 
@@ -526,90 +673,130 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Bit Distribution Score:</strong> ${lsb.bit_distribution_score !== undefined ? escapeHtml(lsb.bit_distribution_score.toFixed(3)) : 'N/A'}</p>
                 <p><strong>Log:</strong> ${lsb.details ? escapeHtml(lsb.details) : 'No details provided.'}</p>
             </div>
-        `; // Correct template literal & escape content
+        `;
     }
 
     function populateChiTab(chi) {
         const confidence = getConfidence(chi);
         const tab = document.getElementById('tab-chi');
-        if (!tab) return;
+        if (!tab) return; // Guard against missing element
         tab.innerHTML = '';
         tab.innerHTML = 
             `<div class="method-card">
-                 <h4 class="${chi.detected ? 'detected' : 'not-detected'}">
-                     <i class="fas ${chi.detected ? 'fa-chart-bar' : 'fa-check-circle'}"></i>
-                    ${escapeHtml(chi.detected ? 'Statistical Deviation Found' : 'Distribution within Norms')}
-                 </h4>
+                <h4 class="${chi.detected ? 'detected' : 'not-detected'}">
+                    <i class="fas ${chi.detected ? 'fa-eye' : 'fa-check-circle'}"></i>
+                    ${escapeHtml(chi.detected ? 'Chi-Square Anomalies Detected' : 'Chi-Square Appears Normal')}
+                </h4>
                 <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
-                <p><strong>Chi-Square Value:</strong> ${chi.chi_square_value !== undefined ? escapeHtml(chi.chi_square_value.toFixed(3)) : 'N/A'}</p>
-                 <p><strong>P-Value:</strong> ${chi.p_value !== undefined ? escapeHtml(chi.p_value.toFixed(5)) : 'N/A'}</p>
                 <p><strong>Log:</strong> ${chi.details ? escapeHtml(chi.details) : 'No details provided.'}</p>
             </div>
-        `; // Correct template literal & escape content
+        `;
     }
 
-    function populateExtractTab(extract) {
-        const confidence = getConfidence(extract);
+    function populateExtractTab(extraction) {
+        const confidence = getConfidence(extraction);
         const tab = document.getElementById('tab-extract');
-        if (!tab) return;
-        tab.innerHTML = '';
-        if (extract.detected) {
-             tab.innerHTML = 
-                `<div class="method-card">
-                     <h4 class="detected">
-                         <i class="fas fa-file-alt"></i> Hidden Data Extracted
-                     </h4>
-                    <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
-                    <p><strong>Assumed Data Type:</strong> ${escapeHtml(extract.data_type) || 'Unknown'}</p>
-                    <p><strong>Log:</strong> ${extract.details ? escapeHtml(extract.details) : 'Extraction successful.'}</p>
-                    <p><strong>Extracted Sample:</strong></p>
-                    <code>${extract.sample ? escapeHtml(extract.sample) : 'No readable sample.'}</code>
-                </div>
-             `; // Correct template literal & escape content
+        if (!tab) return; // Guard against missing element
+        tab.innerHTML = ''; // Clear previous content
+
+        if (extraction.detected) {
+            // Display details when data is detected and extracted
+            const card = document.createElement('div');
+            card.className = 'method-card';
+
+            card.innerHTML = 
+                `<h4 class="detected">
+                     <i class="fas fa-file-alt"></i> Hidden Data Extracted
+                 </h4>
+                 <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
+                 <p><strong>Assumed Data Type:</strong> ${escapeHtml(extraction.data_type) || 'Unknown'}</p>
+                 <p><strong>Log:</strong> ${extraction.details ? escapeHtml(extraction.details) : 'Extraction successful.'}</p>
+                 <p><strong>Extracted Sample:</strong></p>
+                 <!-- Use pre for better formatting of potentially multi-line text -->
+                 <div class="extracted-sample-container">
+                     <pre><code class="extracted-data">${extraction.sample ? escapeHtml(extraction.sample) : 'No readable sample.'}</code></pre>
+                     ${extraction.sample ? '<button class="copy-button" title="Copy to clipboard"><i class="far fa-copy"></i> Copy</button>' : ''} 
+                 </div>
+             `;
+
+            tab.appendChild(card);
+
+            // Add event listener to the copy button if it exists
+            const copyButton = card.querySelector('.copy-button');
+            if (copyButton) {
+                copyButton.addEventListener('click', () => {
+                    const codeElement = card.querySelector('code.extracted-data');
+                    const textToCopy = codeElement ? codeElement.textContent : '';
+                    
+                    if (textToCopy && navigator.clipboard) {
+                        navigator.clipboard.writeText(textToCopy).then(() => {
+                            // Success feedback
+                            copyButton.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                            copyButton.disabled = true;
+                            setTimeout(() => {
+                                copyButton.innerHTML = '<i class="far fa-copy"></i> Copy';
+                                copyButton.disabled = false;
+                            }, 2000); // Reset after 2 seconds
+                        }).catch(err => {
+                            console.error('Failed to copy text: ', err);
+                            // Optionally show error feedback to user
+                             copyButton.innerHTML = '<i class="fas fa-times"></i> Failed';
+                              setTimeout(() => {
+                                copyButton.innerHTML = '<i class="far fa-copy"></i> Copy';
+                            }, 2000);
+                        });
+                    } else if (!navigator.clipboard) {
+                         console.warn('Clipboard API not available.');
+                         // Provide fallback or message
+                         copyButton.textContent = 'Cannot copy';
+                         copyButton.disabled = true;
+                    }
+                });
+            }
+
         } else {
-             tab.innerHTML = 
+            // Display message when no data is detected/extracted
+            tab.innerHTML = 
                  `<div class="method-card">
                      <h4 class="not-detected">
                          <i class="fas fa-times-circle"></i> No Hidden Data Extracted
                      </h4>
                     <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
-                    <p><strong>Log:</strong> ${extract.details ? escapeHtml(extract.details) : 'No structured data identified.'}</p>
+                    <p><strong>Log:</strong> ${extraction.details ? escapeHtml(extraction.details) : 'No structured data identified.'}</p>
                  </div>
-            `; // Correct template literal & escape content
+            `;
         }
     }
 
-     function populateHistTab(hist) {
-        const confidence = getConfidence(hist);
+    function populateHistTab(histogram) {
+        const confidence = getConfidence(histogram);
         const tab = document.getElementById('tab-hist');
-        if (!tab) return;
+        if (!tab) return; // Guard against missing element
         tab.innerHTML = '';
         tab.innerHTML = 
-             `<div class="method-card">
-                 <h4 class="${hist.detected ? 'detected' : 'not-detected'}">
-                     <i class="fas ${hist.detected ? 'fa-wave-square' : 'fa-check-circle'}"></i>
-                    ${escapeHtml(hist.detected ? 'Histogram Irregularities Noted' : 'Histogram Appears Normal')}
-                 </h4>
+            `<div class="method-card">
+                <h4 class="${histogram.detected ? 'detected' : 'not-detected'}">
+                    <i class="fas ${histogram.detected ? 'fa-eye' : 'fa-check-circle'}"></i>
+                    ${escapeHtml(histogram.detected ? 'Histogram Anomalies Detected' : 'Histogram Appears Normal')}
+                </h4>
                 <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
-                <p><strong>Suspicious Patterns Count:</strong> ${hist.suspicious_patterns !== undefined ? escapeHtml(hist.suspicious_patterns) : 'N/A'}</p>
-                <p><strong>Log:</strong> ${hist.details ? escapeHtml(hist.details) : 'No details provided.'}</p>
-                 ${hist.plot_base64 ? `<img src="data:image/png;base64,${hist.plot_base64}" alt="Histogram Plot" style="max-width: 100%; margin-top: 10px; border: 1px solid var(--border-color);">` : ''}
+                <p><strong>Log:</strong> ${histogram.details ? escapeHtml(histogram.details) : 'No details provided.'}</p>
             </div>
-        `; // Correct template literal & escape content
+        `;
     }
 
     // Basic HTML escaping
     function escapeHtml(unsafe) {
         if (typeof unsafe !== 'string') {
-             if (unsafe === null || unsafe === undefined) return '';
-             unsafe = String(unsafe); // Convert numbers etc. to string
-         }
+            if (unsafe === null || unsafe === undefined) return '';
+            unsafe = String(unsafe); // Convert numbers etc. to string
+        }
         return unsafe
-             .replace(/&/g, "&amp;")
-             .replace(/</g, "&lt;")
-             .replace(/>/g, "&gt;")
-             .replace(/"/g, "&quot;")
-             .replace(/'/g, "&#039;");
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 
@@ -633,11 +820,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Make cards visible with stagger
                 const cards = activeContent.querySelectorAll('.method-card');
-                 cards.forEach((card, index) => {
-                     setTimeout(() => {
-                         card.classList.add('visible');
-                     }, index * 50);
-                 });
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, index * 50);
+                });
             }
         });
     });
