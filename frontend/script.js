@@ -111,8 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
            <li><strong>MIME Type:</strong> ${file.type}</li>
            <li><strong>Dimensions:</strong> ${imgElement.naturalWidth} x ${imgElement.naturalHeight} pixels</li>
            `;
-        // Note: Color mode isn't directly available via standard File/Image API
-        imageDetailsList.innerHTML += `<li><strong>Color Mode:</strong> (Requires server-side check)</li>`;
     }
 
     function resetAnalysisUI() {
