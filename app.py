@@ -102,19 +102,21 @@ def lsbpic():
         lsb_array = img_array & 1
         lsb_image_array = (lsb_array * 255).astype(np.uint8)
 
+        try:
+            lsb_image = Image.fromarray(lsb_image_array)
 
-        lsb_image = Image.fromarray(lsb_image_array)
+            # Save the LSB image to a temporary file
+            lsb_image_path = os.path.join(tmpdir, "lsb_image.png")
+            lsb_image.save(lsb_image_path)
 
-        # Save the LSB image to a temporary file
-        lsb_image_path = os.path.join(tmpdir, "lsb_image.png")
-        lsb_image.save(lsb_image_path)
-
-        # Encode the LSB image in base64
-        with open(lsb_image_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-
-        # Return the base64-encoded LSB image as a response
-        return jsonify({"lsb_image_base64": encoded_string})
+            # Encode the LSB image in base64
+            with open(lsb_image_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                # Return the base64-encoded LSB image as a response
+                return jsonify({"lsb_image_base64": encoded_string})
+        except Exception as e:
+            print(f"Error processing LSB image: {e}")
+            return jsonify({"error": "Failed to process LSB image"}), 500
 
 @app.route('/')
 def index():
