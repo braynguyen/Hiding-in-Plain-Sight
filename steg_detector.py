@@ -4,6 +4,8 @@ import numpy as np
 from PIL import Image
 import cv2
 from stegano import lsb
+import jpegio as jio
+from scipy.stats import chisquare
 import binascii
 
 class SteganographyDetector:
@@ -35,6 +37,8 @@ class SteganographyDetector:
         results["detection_methods"]["chi_square"] = self.chi_square_test(image_path)
         results["detection_methods"]["sample_extraction"] = self.extract_sample(image_path)
         results["detection_methods"]["histogram_analysis"] = self.histogram_analysis(image_path)
+        results["detection_methods"]["jsteg_dct_analysis"] = self.detect_jsteg(image_path)
+
         
         # Determine overall likelihood of steganography
         positive_detections = sum(1 for method, result in results["detection_methods"].items() 
@@ -112,6 +116,49 @@ class SteganographyDetector:
                 "details": "LSB patterns show signs of non-random data" if lsb_score < self.lsb_threshold else "LSB patterns appear random"
             }
             
+        except Exception as e:
+            return {"detected": False, "error": str(e)}
+        
+    def detect_jsteg(self, image_path):
+        """
+        Detect potential JSteg steganography by analyzing DCT coefficients in JPEG images.
+
+        Args:
+            image_path: Path to JPEG image file
+            
+        Returns:
+            dict: Detection results
+        """
+        try:
+            if not image_path.lower().endswith(".jpg") and not image_path.lower().endswith(".jpeg"):
+                return {"detected": False, "reason": "Not a JPEG image"}
+            
+            jpeg = jio.read(image_path)
+            coeffs = jpeg.coef_arrays[0]  # Y channel DCT coefficients
+            quant = jpeg.quant_tables[0]  # Quantization table
+
+            # Flatten the 2D blocks to 1D array of non-zero AC coefficients
+            non_zero_ac_coeffs = coeffs[(coeffs != 0) & (coeffs != coeffs[0, 0])].flatten()
+            
+            if len(non_zero_ac_coeffs) == 0:
+                return {"detected": False, "reason": "No valid AC coefficients to analyze"}
+
+            lsb_values = np.abs(non_zero_ac_coeffs) % 2
+            ones = np.sum(lsb_values)
+            zeros = len(lsb_values) - ones
+
+            # Expected uniform distribution
+            expected = [len(lsb_values) / 2] * 2
+            chi_stat, p_value = chisquare([zeros, ones], f_exp=expected)
+
+            detected = p_value < 0.05
+            return {
+                "detected": detected,
+                "p_value": p_value,
+                "ones_ratio": ones / len(lsb_values),
+                "details": "LSB of AC DCT coefficients show non-uniform distribution" if detected else "No strong sign of manipulation in DCT LSBs"
+            }
+
         except Exception as e:
             return {"detected": False, "error": str(e)}
     
