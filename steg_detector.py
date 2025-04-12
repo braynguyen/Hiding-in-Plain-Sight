@@ -219,7 +219,8 @@ class SteganographyDetector:
                 if row < img_array.shape[0]:
                     pixel = img_array[row, col]
                     if len(img_array.shape) == 3 and img_array.shape[2] >= 3:
-                        lsb_bits.append(pixel[0] & 1)
+                        for channel in range(3):  # R, G, B
+                            lsb_bits.append(pixel[channel] & 1)
             
             # Convert bits to bytes
             if len(lsb_bits) >= 8:
@@ -234,7 +235,7 @@ class SteganographyDetector:
                 is_text = all(32 <= b <= 126 for b in byte_array[:20])
                 
                 if is_text:
-                    sample_text = byte_array.decode('ascii', errors='replace')[:50]
+                    sample_text = byte_array.decode('ascii', errors='replace')
                     return {
                         "detected": True,
                         "sample": sample_text,
@@ -242,7 +243,7 @@ class SteganographyDetector:
                         "details": "Manually extracted potential hidden text"
                     }
                 else:
-                    sample_hex = binascii.hexlify(byte_array[:20]).decode('ascii')
+                    sample_hex = binascii.hexlify(byte_array).decode('ascii')
                     return {
                         "detected": True,
                         "sample": sample_hex,
