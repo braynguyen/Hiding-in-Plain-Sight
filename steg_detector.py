@@ -278,25 +278,14 @@ class SteganographyDetector:
                         byte = (byte << 1) | lsb_bits[i + j]
                     byte_array.append(byte)
                 
-                # Check if the extracted data looks like text
-                is_text = all(32 <= b <= 126 for b in byte_array[:10])
-                
-                if is_text:
-                    sample_text = byte_array.decode('ascii', errors='replace')
-                    return {
-                        "detected": True,
-                        "sample": sample_text,
-                        "data_type": "text",
-                        "details": "Manually extracted potential hidden text"
-                    }
-                else:
-                    sample_hex = binascii.hexlify(byte_array).decode('ascii')
-                    return {
-                        "detected": True,
-                        "sample": sample_hex,
-                        "data_type": "binary",
-                        "details": "Manually extracted potential hidden binary data"
-                    }
+                sample_text = byte_array.decode('ascii', errors='replace')
+                sample_hex = binascii.hexlify(byte_array).decode('ascii')
+
+                return {
+                    'detected': True,
+                    'sample_text': sample_text,
+                    'sample_hex': sample_hex
+                }
             
             return {"detected": False, "reason": "No hidden data found in sample"}
             
