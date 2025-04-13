@@ -234,20 +234,20 @@ class SteganographyDetector:
             dict: Extraction results
         """
         try:
-            # Try to extract data using stegano library
-            try:
-                hidden_text = lsb.reveal(image_path)
-                if hidden_text:
-                    # Check if the extracted data looks like text
-                    is_text = all(32 <= ord(c) <= 126 for c in hidden_text[:100] if c)
-                    return {
-                        "detected": True,
-                        "sample": hidden_text[:100] + "..." if len(hidden_text) > 100 else hidden_text,
-                        "data_type": "text" if is_text else "binary",
-                        "details": "Successfully extracted hidden data"
-                    }
-            except Exception:
-                pass  # Stegano extraction failed, continue with manual extraction
+            # # Try to extract data using stegano library
+            # try:
+            #     hidden_text = lsb.reveal(image_path)
+            #     if hidden_text:
+            #         # Check if the extracted data looks like text
+            #         is_text = all(32 <= ord(c) <= 126 for c in hidden_text[:100] if c)
+            #         return {
+            #             "detected": True,
+            #             "sample": hidden_text[:100] + "..." if len(hidden_text) > 100 else hidden_text,
+            #             "data_type": "text" if is_text else "binary",
+            #             "details": "Successfully extracted hidden data"
+            #         }
+            # except Exception:
+            #     pass  # Stegano extraction failed, continue with manual extraction
             
             # Manual LSB extraction for a sample
             img = Image.open(image_path)
