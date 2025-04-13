@@ -234,21 +234,6 @@ class SteganographyDetector:
             dict: Extraction results
         """
         try:
-            # # Try to extract data using stegano library
-            # try:
-            #     hidden_text = lsb.reveal(image_path)
-            #     if hidden_text:
-            #         # Check if the extracted data looks like text
-            #         is_text = all(32 <= ord(c) <= 126 for c in hidden_text[:100] if c)
-            #         return {
-            #             "detected": True,
-            #             "sample": hidden_text[:100] + "..." if len(hidden_text) > 100 else hidden_text,
-            #             "data_type": "text" if is_text else "binary",
-            #             "details": "Successfully extracted hidden data"
-            #         }
-            # except Exception:
-            #     pass  # Stegano extraction failed, continue with manual extraction
-            
             # Manual LSB extraction for a sample
             img = Image.open(image_path)
             img_array = np.array(img)
@@ -257,7 +242,7 @@ class SteganographyDetector:
                 return {"detected": False, "reason": "Grayscale image, insufficient channels for sample extraction"}
             
             # Extract LSB from a portion of the image
-            sample_size = min(1000, img_array.shape[0] * img_array.shape[1])
+            sample_size = img_array.shape[0] * img_array.shape[1]
             lsb_bits = []
             
             for i in range(sample_size):
