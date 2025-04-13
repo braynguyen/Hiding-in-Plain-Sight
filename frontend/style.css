@@ -732,7 +732,7 @@ body {
     width: 80px;  /* Size of the lens */
     height: 80px;
     z-index: 10;
-    display: none; /* Hidden by default */
+    display: none !important; /* hide the lens permanently */
     pointer-events: none; /* Allow events to pass through to image */
 }
 
@@ -746,9 +746,9 @@ body {
     z-index: 11;
     display: none; /* Hidden by default */
     pointer-events: none;
-    /* Position it, e.g., to the right of the container */
-    top: 0;
-    left: 105%; 
+    /* Position it inside the container, bottom right */
+    bottom: 10px; 
+    right: 10px;
 }
 
 /* Remove incorrect cursor style from li */
@@ -795,7 +795,6 @@ body {
 /* cursor glow effect applied to containers */
 .container::before,
 .image-preview-container::before,
-.lsb-pic-container::before,
 .detailed-results::before {
     content: '';
     position: absolute; /* position relative to the container */
@@ -817,7 +816,6 @@ body {
 
 .container::after,
 .image-preview-container::after,
-.lsb-pic-container::after,
 .detailed-results::after {
     content: '';
     position: absolute;
@@ -840,7 +838,6 @@ body {
 /* Show shimmer on hover */
 .container:hover::after,
 .image-preview-container:hover::after,
-.lsb-pic-container:hover::after,
 .detailed-results:hover::after {
     opacity: 1;
 }

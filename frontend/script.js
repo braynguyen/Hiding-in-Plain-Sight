@@ -185,10 +185,33 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSelectedFileInZip = null;
 
     // --- Global Mousemove Listener for Cursor Glow Effect ---
+    let hoveredGlowElement = null; // Track the currently hovered element
+
+    const glowElements = document.querySelectorAll('.container, .image-preview-container, .detailed-results');
+
+    glowElements.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            hoveredGlowElement = el;
+        });
+        el.addEventListener('mouseleave', () => {
+            // Optionally reset the style if the mouse leaves? Or just let the ::before hide?
+            // For now, just clear the tracked element.
+            hoveredGlowElement = null;
+        });
+    });
+
     document.addEventListener('mousemove', (e) => {
-        // Update CSS variables for the glow position
-        document.body.style.setProperty('--cursor-x', e.clientX + 'px');
-        document.body.style.setProperty('--cursor-y', e.clientY + 'px');
+        // Update CSS variables for the glow position *only* on the hovered element
+        // document.body.style.setProperty('--cursor-x', e.clientX + 'px'); // removed
+        // document.body.style.setProperty('--cursor-y', e.clientY + 'px'); // removed
+        if (hoveredGlowElement) {
+            const rect = hoveredGlowElement.getBoundingClientRect();
+            const x = e.clientX - rect.left; // x position within the element.
+            const y = e.clientY - rect.top;  // y position within the element.
+
+            hoveredGlowElement.style.setProperty('--cursor-x', `${x}px`);
+            hoveredGlowElement.style.setProperty('--cursor-y', `${y}px`);
+        }
     });
 
     fileInput.addEventListener('change', (event) => {
@@ -966,7 +989,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Position the background image in the result div (this logic remains the same)
             result.style.backgroundPosition = "-" + ((x * zoom) - result.offsetWidth / 2) + "px -" + ((y * zoom) - result.offsetHeight / 2) + "px";
             
-             // Show lens and result
+             // Show result (lens display logic removed)
             result.style.display = 'block';
         }
 
@@ -987,13 +1010,11 @@ document.addEventListener('DOMContentLoaded', () => {
         img.addEventListener("mouseleave", () => {
             // No need to manage custom crosshair visibility
             result.style.display = 'none';
-            lens.style.display = 'none';
         });
          // Also hide if mouse leaves the container entirely
         container.addEventListener("mouseleave", () => {
             // No need to manage custom crosshair visibility
             result.style.display = 'none';
-            lens.style.display = 'none';
         });
     }
 
