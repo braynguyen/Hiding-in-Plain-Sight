@@ -40,21 +40,7 @@ body {
 }
 
 /* Cursor Glow Effect */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none; /* Don't block interactions */
-    background: radial-gradient(
-        circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
-        rgba(80, 200, 120, 0.09) 0%, /* Slightly increased opacity */
-        rgba(80, 200, 120, 0.0) 350px /* Slightly increased radius */
-    );
-    z-index: 0; /* Position between matrix (-1) and main container (1) */
-}
+/* removed body::before rule */
 
 .container {
     display: flex;
@@ -806,6 +792,29 @@ body {
 }
 
 /* Shimmer/Gleam Effect on Borders */
+/* cursor glow effect applied to containers */
+.container::before,
+.image-preview-container::before,
+.lsb-pic-container::before,
+.detailed-results::before {
+    content: '';
+    position: absolute; /* position relative to the container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(
+        circle at var(--cursor-x) var(--cursor-y), /* use element-relative coords */
+        rgba(80, 200, 120, 0.09) 0%,
+        rgba(80, 200, 120, 0.0) 350px
+    );
+    border-radius: inherit; /* match parent's border radius */
+    z-index: -1; /* behind the container's content */
+    overflow: hidden; /* ensure glow stays within bounds */
+    /* note: javascript needs to update --cursor-x/--cursor-y relative to the element */
+}
+
 .container::after,
 .image-preview-container::after,
 .lsb-pic-container::after,
