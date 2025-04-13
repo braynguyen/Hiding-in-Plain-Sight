@@ -184,6 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentZipResults = null;
     let currentSelectedFileInZip = null;
 
+    // --- Global Mousemove Listener for Cursor Glow Effect ---
+    document.addEventListener('mousemove', (e) => {
+        // Update CSS variables for the glow position
+        document.body.style.setProperty('--cursor-x', e.clientX + 'px');
+        document.body.style.setProperty('--cursor-y', e.clientY + 'px');
+    });
+
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -743,60 +750,80 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.innerHTML = ''; // Clear previous content
 
         if (extraction.detected) {
-            // Display details when data is detected and extracted
+            // Create the main card
             const card = document.createElement('div');
             card.className = 'method-card';
 
+            const sampleText = extraction.sample_text ? escapeHtml(extraction.sample_text) : 'No text sample.';
+            const sampleHex = extraction.sample_hex ? escapeHtml(extraction.sample_hex) : 'No hex sample.';
+
+            // Build inner HTML with tabs
             card.innerHTML = 
                 `<h4 class="detected">
                          <i class="fas fa-file-alt"></i> Hidden Data Extracted
                      </h4>
                  <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
-                 <p><strong>Assumed Data Type:</strong> ${escapeHtml(extraction.data_type) || 'Unknown'}</p>
                  <p><strong>Log:</strong> ${extraction.details ? escapeHtml(extraction.details) : 'Extraction successful.'}</p>
-                    <p><strong>Extracted Sample:</strong></p>
-                 <!-- Use pre for better formatting of potentially multi-line text -->
-                 <div class="extracted-sample-container">
-                     <pre><code class="extracted-data">${extraction.sample ? escapeHtml(extraction.sample) : 'No readable sample.'}</code>
-                     ${extraction.sample ? '<button class="copy-button" title="Copy to clipboard"><i class="far fa-copy"></i>Copy</button>' : ''}</pre>
-                      
+                 
+                 <!-- Inner Tab Navigation for Sample -->
+                 <div class="sample-tabs" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+                     <button class="sample-tab-button active" data-tab="text">Text View</button>
+                     <button class="sample-tab-button" data-tab="hex">Hex View</button>
+                 </div>
+
+                 <!-- Inner Tab Content -->
+                 <div class="sample-tab-content sample-text-content active">
+                      <div class="extracted-sample-container">
+                         <pre><code class="extracted-data-text">${sampleText}</code></pre>
+                         ${extraction.sample_text ? '<button class="copy-button text-copy-button" title="Copy Text"><i class="far fa-copy"></i> Copy Text</button>' : ''} 
+                      </div>
+                 </div>
+                 
+                 <div class="sample-tab-content sample-hex-content">
+                     <div class="extracted-sample-container">
+                         <pre><code class="extracted-data-hex">${sampleHex}</code></pre>
+                         ${extraction.sample_hex ? '<button class="copy-button hex-copy-button" title="Copy Hex"><i class="far fa-copy"></i> Copy Hex</button>' : ''} 
+                      </div>
                 </div>
              `;
 
             tab.appendChild(card);
 
-            // Add event listener to the copy button if it exists
-            const copyButton = card.querySelector('.copy-button');
-            if (copyButton) {
-                copyButton.addEventListener('click', () => {
-                    const codeElement = card.querySelector('code.extracted-data');
-                    const textToCopy = codeElement ? codeElement.textContent : '';
-                    
-                    if (textToCopy && navigator.clipboard) {
-                        navigator.clipboard.writeText(textToCopy).then(() => {
-                            // Success feedback
-                            copyButton.innerHTML = '<i class="fas fa-check"></i>Copied!';
-                            copyButton.disabled = true;
-                            setTimeout(() => {
-                                copyButton.innerHTML = '<i class="far fa-copy"></i>Copy';
-                                copyButton.disabled = false;
-                            }, 2000); // Reset after 2 seconds
-                        }).catch(err => {
-                            console.error('Failed to copy text: ', err);
-                            // Optionally show error feedback to user
-                             copyButton.innerHTML = '<i class="fas fa-times"></i>Failed';
-                              setTimeout(() => {
-                                copyButton.innerHTML = '<i class="far fa-copy"></i>Copy';
-                            }, 2000);
-                        });
-                    } else if (!navigator.clipboard) {
-                         console.warn('Clipboard API not available.');
-                         // Provide fallback or message
-                         copyButton.textContent = 'Cannot copy';
-                         copyButton.disabled = true;
-                    }
+            // Add event listeners for inner tabs within this card
+            const sampleTabButtons = card.querySelectorAll('.sample-tab-button');
+            const sampleTabContents = card.querySelectorAll('.sample-tab-content');
+
+            sampleTabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetInnerTab = button.dataset.tab;
+
+                    // Deactivate all inner tabs/content within this card
+                    sampleTabButtons.forEach(btn => btn.classList.remove('active'));
+                    sampleTabContents.forEach(content => content.classList.remove('active'));
+
+                    // Activate the clicked inner tab/content
+                    button.classList.add('active');
+                    card.querySelector(`.sample-${targetInnerTab}-content`).classList.add('active');
+                });
+            });
+
+            // Add event listener for the TEXT copy button
+            const textCopyButton = card.querySelector('.text-copy-button');
+            if (textCopyButton) {
+                textCopyButton.addEventListener('click', () => {
+                    const codeElement = card.querySelector('code.extracted-data-text');
+                    handleCopyClick(textCopyButton, codeElement);
                 });
             }
+            
+            // Add event listener for the HEX copy button
+            const hexCopyButton = card.querySelector('.hex-copy-button');
+             if (hexCopyButton) {
+                 hexCopyButton.addEventListener('click', () => {
+                     const codeElement = card.querySelector('code.extracted-data-hex');
+                     handleCopyClick(hexCopyButton, codeElement);
+                 });
+             }
 
         } else {
             // Display message when no data is detected/extracted
@@ -809,6 +836,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>Log:</strong> ${extraction.details ? escapeHtml(extraction.details) : 'No structured data identified.'}</p>
                  </div>
             `;
+        }
+    }
+
+    // --- Helper function for Copy Button Logic ---
+    function handleCopyClick(button, codeElement) {
+        const textToCopy = codeElement ? codeElement.textContent : '';
+        const originalHtml = button.innerHTML; // Store original button content
+        
+        if (textToCopy && navigator.clipboard) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Success feedback
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.disabled = true;
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
+                }, 2000); // Reset after 2 seconds
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                // Error feedback
+                button.innerHTML = '<i class="fas fa-times"></i> Failed';
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                }, 2000);
+            });
+        } else if (!navigator.clipboard) {
+            console.warn('Clipboard API not available.');
+            // Fallback or message
+            button.textContent = 'Cannot copy';
+            button.disabled = true;
+             setTimeout(() => {
+                 button.innerHTML = originalHtml;
+                 button.disabled = false; // Re-enable maybe?
+             }, 2000);
         }
     }
 

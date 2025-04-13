@@ -23,7 +23,7 @@
         "sample_extraction": {
             "detected": true,
             "sample_text": "I love Pitt CSC",
-            "sample_hez": "..."
+            "sample_hex": "..."
         }
     },
     "file_size": 1039,

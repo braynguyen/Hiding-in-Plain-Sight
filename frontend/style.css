@@ -11,6 +11,8 @@
     --font-main: 'Orbitron', sans-serif;
     --font-mono: 'Roboto Mono', monospace;
     --content-bg: rgba(0, 10, 0, 0.6);
+    --glow-color: rgba(180, 255, 200, 0.06); /* Reduced opacity for shimmer */
+    --glow-size: 200px; /* Reduced size for shimmer */
 }
 
 * {
@@ -37,6 +39,23 @@ body {
     opacity: 0.6;
 }
 
+/* Cursor Glow Effect */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Don't block interactions */
+    background: radial-gradient(
+        circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+        rgba(80, 200, 120, 0.09) 0%, /* Slightly increased opacity */
+        rgba(80, 200, 120, 0.0) 350px /* Slightly increased radius */
+    );
+    z-index: 0; /* Position between matrix (-1) and main container (1) */
+}
+
 .container {
     display: flex;
     max-width: 1600px;
@@ -49,6 +68,7 @@ body {
     backdrop-filter: blur(3px);
     z-index: 1;
     position: relative;
+    overflow: hidden; /* Clip the glow */
 }
 
 /* === Sidebar === */
@@ -200,6 +220,8 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative; /* Needed for pseudo-element */
+    overflow: hidden; /* Clip the glow */
 }
 
 .image-preview-container h3 {
@@ -343,6 +365,8 @@ header {
     background-color: rgba(0, 0, 0, 0.1);
     animation: fadeInUp 0.5s ease-out 0.4s forwards;
     opacity: 0;
+    position: relative; /* Ensure positioning context */
+    overflow: hidden; /* Clip the glow */
 }
 
 .detailed-results h3 {
@@ -632,24 +656,33 @@ body {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: var(--primary-text);
-    color: var(--bg-color);
-    border: none;
-    padding: 3px 8px;
+    background-color: rgba(0, 20, 0, 0.7); /* Dark, slightly transparent green */
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 2px 6px;
     border-radius: 3px;
     cursor: pointer;
-    font-size: 0.7em;
-    opacity: 1;
-    transition: opacity 0.2s ease, background-color 0.2s ease;
+    font-size: 0.8em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Roboto Mono', monospace;
+    font-family: var(--font-mono);
+    opacity: 0; /* Initially hidden */
+    pointer-events: none; /* Not interactive when hidden */
+    transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.copy-button:hover {
+/* Show button when hovering the container */
+.extracted-sample-container:hover .copy-button {
     opacity: 1;
-    background-color: var(--accent-color);
+    pointer-events: auto; /* Make interactive */
+}
+
+/* Keep existing hover style for the button itself */
+.copy-button:hover {
+    color: var(--primary-text);
+    border-color: var(--primary-text);
+    background-color: rgba(0, 40, 10, 0.8); /* Slightly lighter/more opaque on hover */
 }
 
 .copy-button i {
@@ -677,6 +710,8 @@ body {
     align-items: center;
     /* Initially hidden, shown by JS */
     display: none; 
+    position: relative; /* Needed for pseudo-element */
+    overflow: hidden; /* Clip the glow */
 }
 
 .lsb-pic-container h3 {
@@ -733,4 +768,70 @@ body {
 /* Remove incorrect cursor style from li */
 #image-details li {
     word-break: break-word; /* Keep existing style if needed */
+}
+
+/* Inner Tabs for Sample Extraction */
+.sample-tabs button.sample-tab-button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--secondary-text);
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-right: 5px;
+    opacity: 0.7;
+    font-family: var(--font-mono);
+    transition: opacity 0.2s ease, color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.sample-tabs button.sample-tab-button:hover {
+    opacity: 1;
+    color: var(--primary-text);
+}
+
+.sample-tabs button.sample-tab-button.active {
+    opacity: 1;
+    color: var(--primary-text);
+    border-bottom-color: var(--primary-text);
+    font-weight: bold;
+}
+
+.sample-tab-content {
+    display: none; /* Hide inactive tabs */
+}
+
+.sample-tab-content.active {
+    display: block; /* Show active tab content */
+}
+
+/* Shimmer/Gleam Effect on Borders */
+.container::after,
+.image-preview-container::after,
+.lsb-pic-container::after,
+.detailed-results::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        circle at var(--cursor-x, 50%) var(--cursor-y, 50%), /* Center on cursor */
+        var(--glow-color) 0%,
+        transparent var(--glow-size) /* Fade out */
+    );
+    border-radius: inherit; /* Match parent's border radius */
+    z-index: 1; /* Position above content but below interactive elements if needed */
+    pointer-events: none; /* Don't block interactions */
+    opacity: 0; /* Hidden by default, shown on hover */
+    transition: opacity 0.4s ease-out;
+}
+
+/* Show shimmer on hover */
+.container:hover::after,
+.image-preview-container:hover::after,
+.lsb-pic-container:hover::after,
+.detailed-results:hover::after {
+    opacity: 1;
 }
