@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             easterEggActive = false;
             currentHue = 0;
             console.log("//: Matrix Stabilized.");
-        }, 5000);
+        }, 10000);
     }
 
     // --- Steganography Detector UI Logic ---
@@ -169,6 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const scanlineContainer = document.querySelector('.scanline-container');
     const lsbPicContainer = document.getElementById('lsb-pic-container'); // New reference
     const lsbPicImg = document.getElementById('lsb-pic'); // New reference
+    const magnifierLens = lsbPicContainer?.querySelector('.magnifier-lens'); // Magnifier lens
+    const magnifierResult = lsbPicContainer?.querySelector('.magnifier-result'); // Magnifier result display
 
     // Zip results elements
     const zipResultsNav = document.getElementById('zip-results-nav');
@@ -181,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Global state for zip results
     let currentZipResults = null;
     let currentSelectedFileInZip = null;
-
 
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -221,9 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (callback) setTimeout(callback, 0); // Allow UI update before callback
         } else {
             // Handle image preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
                 imagePreview.style.display = 'block'; // Show image element
 
                 // Put the image preview back into its container
@@ -250,14 +251,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Wait for image to load to get dimensions
-                imagePreview.onload = () => {
+            imagePreview.onload = () => {
                     displayFileInfo(file, imagePreview); // Display full image info
                     if (callback) callback();
                     imagePreview.onload = null; // Prevent multiple calls
-                };
-                imagePreview.onerror = () => {
-                    console.error("Error loading image preview.");
-                    statusText.textContent = "//: Error loading image preview.";
+            };
+            imagePreview.onerror = () => {
+                console.error("Error loading image preview.");
+                statusText.textContent = "//: Error loading image preview.";
                     // Show error within the preview area
                     const errorP = document.createElement('p');
                     errorP.style.color = 'var(--error-color)';
@@ -265,12 +266,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     imagePreviewContainer.appendChild(errorP);
                     displayFileInfo(file); // Show basic info
                     if (callback) callback();
-                    imagePreview.onerror = null;
-                }
-            };
-            reader.onerror = () => {
-                console.error("Error reading file.");
-                statusText.textContent = "//: Error reading file.";
+                imagePreview.onerror = null;
+            }
+        };
+        reader.onerror = () => {
+            console.error("Error reading file.");
+            statusText.textContent = "//: Error reading file.";
                 const errorP = document.createElement('p');
                 errorP.style.color = 'var(--error-color)';
                 errorP.textContent = 'Error reading file';
@@ -329,6 +330,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset LSB Pic elements
         if (lsbPicContainer) lsbPicContainer.style.display = 'none';
         if (lsbPicImg) lsbPicImg.src = '#';
+        // Hide magnifier elements on reset
+        if (magnifierLens) magnifierLens.style.display = 'none';
+        if (magnifierResult) magnifierResult.style.display = 'none';
 
         // Reset zip state
         zipResultsNav.style.display = 'none';
@@ -383,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     errorMsg += ` - ${escapeHtml(response.statusText)}`;
                 }
-                throw new Error(errorMsg);
+                 throw new Error(errorMsg);
             }
 
             const results = await response.json();
@@ -614,17 +618,35 @@ document.addEventListener('DOMContentLoaded', () => {
         overallResultDiv.className = 'overall-result';
         overallResultDiv.classList.add(resultData.steganography_detected ? 'positive' : 'negative');
 
-        // Update LSB Visualization display
-        if (lsbPicContainer && lsbPicImg) {
-            // ** Assumption: Backend returns LSB image as base64 in this field **
-            const lsbBase64 = resultData?.detection_methods?.lsb_analysis?.visualization_base64;
+        // Update LSB Visualization display & Setup Magnifier
+        if (lsbPicContainer && lsbPicImg && magnifierLens && magnifierResult) {
+            const lsbBase64 = resultData?.lsbpic;
             
             if (lsbBase64) {
                 lsbPicImg.src = `data:image/png;base64,${lsbBase64}`;
-                lsbPicContainer.style.display = 'flex'; // Use flex to match styling
+                
+                // Wait for image to load before setting up magnifier
+                lsbPicImg.onload = () => {
+                    lsbPicContainer.style.display = 'flex'; // Show container AFTER image loads
+                    setupMagnifier(lsbPicImg, lsbPicContainer, magnifierLens, magnifierResult, 5); // Setup with zoom factor 5
+                    lsbPicImg.onload = null; // Remove listener
+                }
+                 lsbPicImg.onerror = () => { // Handle load error
+                     console.error("Failed to load LSB visualization image.");
+                     lsbPicContainer.style.display = 'none'; 
+                     lsbPicImg.onerror = null;
+                 }
+                 // If already loaded (e.g., cached), setup immediately
+                 if (lsbPicImg.complete && lsbPicImg.naturalWidth > 0) {
+                     lsbPicContainer.style.display = 'flex';
+                     setupMagnifier(lsbPicImg, lsbPicContainer, magnifierLens, magnifierResult, 5);
+                 }
+
             } else {
                 lsbPicImg.src = '#'; // Clear source if no image data
                 lsbPicContainer.style.display = 'none'; // Hide container
+                magnifierLens.style.display = 'none'; // Hide lens
+                magnifierResult.style.display = 'none'; // Hide result area
             }
         }
 
@@ -638,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
             populateHistTab(resultData.detection_methods.histogram_analysis || {});
         } else {
             console.warn(`Analysis data missing 'detection_methods' field ${filename ? 'for ' + escapeHtml(filename) : ''}.`); // Escape filename
-            tabContents.forEach(content => content.innerHTML = '<p>//: Detailed analysis data not available.</p>');
+             tabContents.forEach(content => content.innerHTML = '<p>//: Detailed analysis data not available.</p>');
         }
 
         // Reset tabs and animate cards for the default tab
@@ -667,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Scroll into view only on initial load
         if (isInitialLoad) {
              setTimeout(() => {
-                 resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
              }, 100);
         }
     }
@@ -704,10 +726,10 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.innerHTML = '';
         tab.innerHTML = 
             `<div class="method-card">
-                <h4 class="${chi.detected ? 'detected' : 'not-detected'}">
+                 <h4 class="${chi.detected ? 'detected' : 'not-detected'}">
                     <i class="fas ${chi.detected ? 'fa-eye' : 'fa-check-circle'}"></i>
                     ${escapeHtml(chi.detected ? 'Chi-Square Anomalies Detected' : 'Chi-Square Appears Normal')}
-                </h4>
+                 </h4>
                 <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
                 <p><strong>Log:</strong> ${chi.details ? escapeHtml(chi.details) : 'No details provided.'}</p>
             </div>
@@ -727,18 +749,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = 
                 `<h4 class="detected">
-                     <i class="fas fa-file-alt"></i> Hidden Data Extracted
-                 </h4>
+                         <i class="fas fa-file-alt"></i> Hidden Data Extracted
+                     </h4>
                  <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
                  <p><strong>Assumed Data Type:</strong> ${escapeHtml(extraction.data_type) || 'Unknown'}</p>
                  <p><strong>Log:</strong> ${extraction.details ? escapeHtml(extraction.details) : 'Extraction successful.'}</p>
-                 <p><strong>Extracted Sample:</strong></p>
+                    <p><strong>Extracted Sample:</strong></p>
                  <!-- Use pre for better formatting of potentially multi-line text -->
                  <div class="extracted-sample-container">
                      <pre><code class="extracted-data">${extraction.sample ? escapeHtml(extraction.sample) : 'No readable sample.'}</code>
                      ${extraction.sample ? '<button class="copy-button" title="Copy to clipboard"><i class="far fa-copy"></i>Copy</button>' : ''}</pre>
                       
-                 </div>
+                </div>
              `;
 
             tab.appendChild(card);
@@ -800,7 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h4 class="${histogram.detected ? 'detected' : 'not-detected'}">
                     <i class="fas ${histogram.detected ? 'fa-eye' : 'fa-check-circle'}"></i>
                     ${escapeHtml(histogram.detected ? 'Histogram Anomalies Detected' : 'Histogram Appears Normal')}
-                </h4>
+                 </h4>
                 <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
                 <p><strong>Log:</strong> ${histogram.details ? escapeHtml(histogram.details) : 'No details provided.'}</p>
             </div>
@@ -850,5 +872,68 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // --- Magnifier Logic ---
+    function setupMagnifier(img, container, lens, result, zoom) {
+        let w = lens.offsetWidth / 2;
+        let h = lens.offsetHeight / 2;
+        
+        // Restore direct cursor style on image
+        img.style.cursor = 'crosshair';
+        result.style.display = 'none'; // Start hidden
+
+        // Set background properties for result display
+        result.style.backgroundImage = "url('" + img.src + "')";
+        result.style.backgroundSize = (img.width * zoom) + "px " + (img.height * zoom) + "px";
+
+        // Function to calculate cursor position and move lens/background
+        function moveMagnifier(e) {
+            e.preventDefault();
+            let pos = getCursorPos(e);
+            let x = pos.x;
+            let y = pos.y;
+
+            // Calculate image offset relative to the container (its offsetParent)
+            let imgOffsetX = img.offsetLeft;
+            let imgOffsetY = img.offsetTop;
+
+
+            // Position the lens: add the image's offset to the cursor-relative position
+            lens.style.left = (imgOffsetX + x - w) + "px";
+            lens.style.top = (imgOffsetY + y - h) + "px";
+
+            // Position the background image in the result div (this logic remains the same)
+            result.style.backgroundPosition = "-" + ((x * zoom) - result.offsetWidth / 2) + "px -" + ((y * zoom) - result.offsetHeight / 2) + "px";
+            
+             // Show lens and result
+            result.style.display = 'block';
+        }
+
+        // Function to get cursor position relative to the image
+        function getCursorPos(e) {
+            let a = img.getBoundingClientRect();
+            let x = e.pageX - a.left - window.pageXOffset;
+            let y = e.pageY - a.top - window.pageYOffset;
+            return { x: x, y: y };
+        }
+
+        // Event listeners for mouse interaction
+        img.addEventListener("mousemove", moveMagnifier);
+        img.addEventListener("mouseenter", () => {
+            // No need to manage custom crosshair visibility
+            // Lens and result are shown within moveMagnifier
+        });
+        img.addEventListener("mouseleave", () => {
+            // No need to manage custom crosshair visibility
+            result.style.display = 'none';
+            lens.style.display = 'none';
+        });
+         // Also hide if mouse leaves the container entirely
+        container.addEventListener("mouseleave", () => {
+            // No need to manage custom crosshair visibility
+            result.style.display = 'none';
+            lens.style.display = 'none';
+        });
+    }
 
 }); // End DOMContentLoaded

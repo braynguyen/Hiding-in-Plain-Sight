@@ -96,7 +96,8 @@ pattern_steg = Image.open('test_images/clean/pattern.png')
 steg_pattern = hide_in_lsb1(pattern_steg, message)
 steg_pattern.save('test_images/steg/steg_pattern.png')
 
-message = "hail to pitt :P"
+message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+
 
 # Hide message in photo-like image
 photo_steg = Image.open('test_images/clean/photo_like.png')

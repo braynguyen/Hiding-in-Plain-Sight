@@ -696,4 +696,41 @@ body {
     display: block;
     margin: 0 auto;
     border: 1px solid var(--secondary-color);
+    cursor: crosshair; /* Restore browser crosshair */
+}
+
+/* Magnifier Styles */
+.lsb-pic-container {
+    /* Need position relative for absolute children */
+    position: relative; 
+}
+
+.magnifier-lens {
+    position: absolute;
+    border: 2px solid var(--accent-color); /* Make lens visible */
+    width: 80px;  /* Size of the lens */
+    height: 80px;
+    z-index: 10;
+    display: none; /* Hidden by default */
+    pointer-events: none; /* Allow events to pass through to image */
+}
+
+.magnifier-result {
+    position: absolute;
+    width: 160px; /* Reduced width */
+    height: 160px; /* Reduced height */
+    border: 1px solid var(--border-color);
+    background-color: #000; /* Background for zoomed area */
+    background-repeat: no-repeat;
+    z-index: 11;
+    display: none; /* Hidden by default */
+    pointer-events: none;
+    /* Position it, e.g., to the right of the container */
+    top: 0;
+    left: 105%; 
+}
+
+/* Remove incorrect cursor style from li */
+#image-details li {
+    word-break: break-word; /* Keep existing style if needed */
 }
