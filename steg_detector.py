@@ -253,6 +253,9 @@ class SteganographyDetector:
                     if len(img_array.shape) == 3 and img_array.shape[2] >= 3:
                         for channel in range(3):  # R, G, B
                             lsb_bits.append(pixel[channel] & 1)
+                
+                if len(lsb_bits) >= 8 and sum(lsb_bits[-8:]) == 0:
+                    break
             
             # Convert bits to bytes
             if len(lsb_bits) >= 8:
