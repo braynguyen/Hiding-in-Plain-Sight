@@ -21,10 +21,9 @@
             "randomness_score": 85.18268859160163
         },
         "sample_extraction": {
-            "data_type": "text",
-            "details": "Successfully extracted hidden data",
             "detected": true,
-            "sample": "I love Pitt CSC"
+            "sample_text": "I love Pitt CSC",
+            "sample_hez": "..."
         }
     },
     "file_size": 1039,
