@@ -767,7 +767,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateExtractTab(extraction) {
-        const confidence = getConfidence(extraction);
         const tab = document.getElementById('tab-extract');
         if (!tab) return; // Guard against missing element
         tab.innerHTML = ''; // Clear previous content
@@ -785,7 +784,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 `<h4 class="detected">
                          <i class="fas fa-file-alt"></i> Hidden Data Extracted
                      </h4>
-                 <p><strong>Confidence Score:</strong> ${escapeHtml((confidence * 100).toFixed(1))}%</p>
                  <p><strong>Log:</strong> ${extraction.details ? escapeHtml(extraction.details) : 'Extraction successful.'}</p>
                  
                  <!-- Inner Tab Navigation for Sample -->
